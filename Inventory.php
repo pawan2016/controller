@@ -1791,7 +1791,6 @@ class Inventory extends CI_Controller {
 		$office_operation_type=$this->session->userdata('office_operation_type');
 		$office_id=$this->session->userdata('office_id');
 		$user_access_type = $this->session->userdata('user_access_type');
-		
 		if($_POST['my_page_type'] == "addData")
 		{
 			$user_access_type = 'Maker';
@@ -1819,6 +1818,13 @@ class Inventory extends CI_Controller {
 		{
 		if($_POST){
 			     $errors=array();
+			      if($user_access_type == "Authorizer"){
+					   if($_POST['stock_transferStatus']=='No'){
+				    if(empty($_POST['narration_recipt'])) {
+							$errors['narration_recipt'] = 'Narration is required';
+						}
+					}
+				  }
 				 if($user_access_type == "Maker"){
 					if(empty($_POST['stock_receipt_date'])) {
 					$errors['stock_receipt_date'] = 'Date of Transfer is required';
@@ -1951,7 +1957,8 @@ class Inventory extends CI_Controller {
 				$stock_received=$postedArr['stock_received'];
 				$stock_pending=$postedArr['stock_pending'];
 				$access_level = (isset($postedArr['access_level'])) ? $postedArr['access_level'] : '';
-				$narration = (isset($postedArr['narration'])) ? $postedArr['narration'] : '';
+				//$narration = (isset($postedArr['narration'])) ? $postedArr['narration'] : '';
+				$narration = (isset($_POST['narration_recipt'])) ? $_POST['narration_recipt'] : '';
 				
 				$createdOn=date('Y-m-d H:i:s');
 				$office_operation_type=$this->session->userdata('office_operation_type');
@@ -2103,7 +2110,7 @@ class Inventory extends CI_Controller {
 					$stock_receipt_productData = $this->db->get_where($tableNameSTOCKRECEIPTproduct,array('stock_receipt_id'=>$stock_receipt_id))->result();
 					
 					
-					$newUpdateData=array('stock_receipt_date'=>$stock_receipt_date,'stock_receipt_number'=>$stock_receipt_number,'stock_transfer_status'=>$stock_transferStatus,'authorized_by'=>$this->session->userdata('user_id'),'access_level_status'=>$access_level,'authorized_date'=>date('Y-m-d H:i:s'));
+					$newUpdateData=array('stock_receipt_date'=>$stock_receipt_date,'narration'=>$_POST['narration_recipt'],'stock_receipt_number'=>$stock_receipt_number,'stock_transfer_status'=>$stock_transferStatus,'authorized_by'=>$this->session->userdata('user_id'),'access_level_status'=>$access_level,'authorized_date'=>date('Y-m-d H:i:s'));
 					$this->db->where('stock_receipt_id',$stock_receipt_id);
 					$this->db->update($tableNameSTOCKRECEIPT,$newUpdateData);
 					
@@ -2268,9 +2275,9 @@ class Inventory extends CI_Controller {
 		$data['view_data']=$this->inventory_model->_get_all_record_of_inventory_stock_receipt_by_stock_transfer_id($stock_receipt_id);
 		$data['view_page']='1';
 		}
-		// echo "<pre>";
-		// print_r($data);
-		// echo "</pre>";
+		 //echo "<pre>";
+		 //print_r($data);
+		 //echo "</pre>";
 		$header['title'] = "Stock Receipt Form";
 		$this->load->view("includes/_header",$header);
 		$this->load->view("includes/_top_menu");

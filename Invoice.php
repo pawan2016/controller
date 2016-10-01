@@ -18,6 +18,7 @@ class Invoice extends CI_Controller {
 public function saveInvoiceData()
 {
 if($_POST){
+
 				$office_id = $this->session->userdata('office_id');
 			    $errors=array();
 				if(empty($_POST['invoice_date'])) {
@@ -56,9 +57,26 @@ if($_POST){
 					 }
 					 
 				 } 
+				 
+				 /* foreach($_POST['count_check'] as $key_total=>$value_check_total)
+				  {
+				 	foreach($_POST['payment_mode_hidden'] as $key=>$value_check)
+				  {
+				
+					  if($value_check=='cheque'){
+					 if($_POST['cheque_relese'][$key] =='select'){
+						$errors['cheque_relese_'.($value_check_total)] = 'Cheque Realization is required';		
+						
+					  }
+				  }
+					  
+				  }
+				}  */
+				 
 				foreach($_POST['payment_mode'] as $key=>$value)
 				{
-					if($value=='cash' && $_POST['payment_mode_amount'][$key]>=200000){
+					//$value=='cash' &&
+					if( $_POST['payment_mode_amount'][$key]>=200000){
 				//if(empty($_POST['customer_pan_number']) && $_POST['total_net_amount']>=200000) 
 					if(empty($_POST['customer_pan_number']))
 					{
@@ -70,10 +88,13 @@ if($_POST){
 						}
 					}
 				  }else{
-					if(empty($_POST['id_proof']) && isset($_POST['id_proof']) && $value=='cash'  &&  $_POST['payment_mode_amount'][$key]>=50000) {
+					  
+					  //&& $value=='cash' 
+					if(empty($_POST['id_proof']) && isset($_POST['id_proof']) &&  $_POST['payment_mode_amount'][$key]>=50000) {
 					$errors['id_proof'] = 'ID Proof required';
 					}
-					if(empty($_POST['id_proof_number']) && $value=='cash'  &&  $_POST['payment_mode_amount'][$key]>=50000) {
+					//&& $value=='cash'
+					if(empty($_POST['id_proof_number'])  &&  $_POST['payment_mode_amount'][$key]>=50000) {
 					$errors['id_proof_number'] = 'ID Proof Number required';
 					}
 				  }
@@ -136,6 +157,7 @@ if($_POST){
 				{
 					$already_paid=$_POST['already_paid'];
 				}
+				//print_r($_POST['payment_mode']);die;
 				foreach($_POST['payment_mode'] as $key=>$value)
 				{
 					//$err_div=$arr_selected_payment_divs[$key];
@@ -149,6 +171,13 @@ if($_POST){
 							  {
 								 
 								   $errors['card_check_name_'.($key+$already_paid)] = 'Card name is required';				
+								   			
+							  }
+							  
+							     if(empty($_POST['card_issuing_bank'][$key]))
+							  {
+								 
+								 $errors['card_issuing_bank_'.($key+$already_paid)] = 'Issuing bank number is required';	
 							  }
 					   }
 					  if(empty($_POST['payment_mode_amount'][$key])){
@@ -163,6 +192,11 @@ if($_POST){
 					  if(empty($_POST['card_check_number'][$key])){
 						$errors['card_check_number_'.($key+$already_paid)] = '  '.$value.' number is required';				
 					  }
+					   if(empty($_POST['card_issuing_bank'][$key])){
+						$errors['card_issuing_bank_'.($key+$already_paid)] = 'Issuing bank number is required';				
+					  }
+					  
+					  
 					  elseif($value=='credit card' || $value=='debit card')
 					  {
 						  if(strlen($_POST['card_check_number'][$key])>4)
@@ -171,6 +205,12 @@ if($_POST){
 						  }
 					  }
 					}
+					 if($value=='cheque'){
+					 if($_POST['cheque_relese'][$key] =='select'){
+						$errors['cheque_relese_'.($key+$already_paid)] = 'Cheque Realization is required';		
+						
+					  }
+				  }
 				}
 				
 				
@@ -199,6 +239,7 @@ if($_POST){
 		$customer_phone_number = $this->input->post('customer_phone_number');
 		$customer_email_id = $this->input->post('customer_email_id');
 		$customer_pan_number = $this->input->post('customer_pan_number');
+		$customer_transaction_id = $this->input->post('customer_transaction_id');
 		$id_proof = $this->input->post('id_proof');
 		$id_proof_number = $this->input->post('id_proof_number');
 		$state = $this->input->post('state');
@@ -253,6 +294,8 @@ $customerInsertData = array('modal_customer_name'=>$customer_name,
 		//$serial_number = $this->input->post('serial_number');
 		$quantity = $this->input->post('quantity');
 		$invoice_type = $this->input->post('invoice_type');
+		$showrom_invoice_narrative = $this->input->post('showrom_invoice_narrative');
+		$customer_transaction_id = $this->input->post('customer_transaction_id');
 		$weight = $this->input->post('weight');
 		$rate_per_quantity = $this->input->post('rate_per_quantity');
 		$discount_percent = $this->input->post('discount_percent');
@@ -271,24 +314,14 @@ $invoiceId=$invoice_id;
 		$invoiceInsertData = array(
 									'invoice_date'=>$invoice_date,
 									'invoice_type'=>$invoice_type,
+									'showrom_invoice_narrative'=>$showrom_invoice_narrative,
+									'customer_transaction_id'=>$customer_transaction_id,
 									'customer_id' => $customer_id,
 									'total_amount' => $total_amount,
 									'surcharge_on_vat' => $surcharge_on_vat,
 									'amount_received' => $received_amount,
-									'adjustment'=>$round_off,
+                                    'adjustment'=>$round_off,
 									'amount_refunded' =>$amount_refunded,
-									'customer_name' =>$customer_name,
-									'customer_address' =>$customer_address,
-									'customer_phone_number' =>$customer_phone_number,
-									'customer_mobile_number' =>$customer_phone_number,
-									'customer_email_id' =>$customer_email_id,
-									'customer_pan_number' =>$customer_pan_number,
-									'customer_id_proof' =>$id_proof,
-									'customer_state' =>$state,
-									'customer_district' =>$district,
-									'customer_city' =>$city,
-									'customer_pincode' =>$modal_customer_pincode,
-									'customer_id_proof_number' =>$id_proof_number,
 									'creator_id' => $this->session->userdata('user_id'),
 									'createdOn' => date('Y-m-d H:i:s'),									
 									);
@@ -369,7 +402,7 @@ else{
 	//$this->base_model->update_record_by_id('invoice_showroom_'.$office_id,array('amount_received'=>$received_amount,'surcharge_on_vat' => $surcharge_on_vat),array('invoice_id'=>$invoiceId));
 	$round_off=($this->input->post('round_off')) ? $this->input->post('round_off') : '0';
     $amount_refunded = ($this->input->post('amount_refunded')) ? $this->input->post('amount_refunded') : '0';
-	$this->base_model->update_record_by_id('invoice_showroom_'.$office_id,array('adjustment'=>$round_off,'amount_refunded' =>$amount_refunded),array('invoice_id'=>$invoiceId));
+	$this->base_model->update_record_by_id('invoice_showroom_'.$office_id,array('adjustment'=>$round_off,'amount_refunded' =>$amount_refunded,'showrom_invoice_narrative'=>$showrom_invoice_narrative,'customer_transaction_id'=>$customer_transaction_id),array('invoice_id'=>$invoiceId));
 }
 //condition for advance mode
 	
@@ -441,6 +474,7 @@ if($received_amount>=$total_net_amount)
 							
 							
 							$historyData = array('current_stock'=>$arr_his_data->net_stock,'product_id'=>$value_product,'transfer_stock'=>$quantity[$key],'net_stock'=>($arr_his_data->net_stock-$quantity[$key]),'type_value'=>'customer','transfer_to'=>$arr_invoice_data->customer_id,'transaction_number'=>$arr_invoice_data->invoice_number,'creator_id'=>$this->session->userdata('user_id'),'createdOn'=>date('Y-m-d H:i:s')); 
+							//print_r($historyData);die;
 							$this->base_model->insert_one_row($history_table,$historyData);
 			
 				
@@ -488,6 +522,7 @@ else{
 		$payment_mode = $this->input->post('payment_mode');
 		$card_check_number = $this->input->post('card_check_number');
 		$card_check_name = $this->input->post('card_check_name');
+		$card_issuing_bank = $this->input->post('card_issuing_bank');
 		
 		$cheque_relese=($this->input->post("cheque_relese"));
 		//print_r($cheque_relese); die;
@@ -499,6 +534,7 @@ else{
 									'payment_amount' => $payment_mode_amount[$key],
 									'card_cheque_number' => $card_check_number[$key],
 									'bank_name'=>$card_check_name[$key],
+									'card_issuing_bank'=>$card_issuing_bank[$key],
 									'cheque_release'=>$cheque_relese[$key],
 									'creator_id' => $this->session->userdata('user_id'),
 									'createdOn' => date('Y-m-d H:i:s'),									
@@ -673,6 +709,7 @@ else{
 		
 		if (empty($errors))
 		{
+			//print_r($_POST);die;
 			$table = 'customer_master';
 			$modal_customer_name = $this->input->post('modal_customer_name');
 			//$modal_customer_short_name = $this->input->post('modal_customer_short_name');
@@ -884,6 +921,8 @@ else{
 		$data['select_product']=$postedArr['select_product'];
 		$this->load->view('includes/_AjaxAddNewDivCommon',$data);	
 	}
+	
+
 
 	public function stock_transfer_inventory(){
 		$this->load->view("includes/_header");
@@ -923,7 +962,7 @@ else{
 	public function sales_invoice_receipt()
 	{
 		$invoiceId =  base64_decode($this->input->get('invoice_id'));
-		$office_id = $this->session->userdata('office_id');
+	     $office_id = $this->session->userdata('office_id'); 
 
 		$data['invoiceDetails'] = $this->db->get_where('invoice_showroom_'.$office_id,array('invoice_id'=>$invoiceId))->row();
 		$custId = $data['invoiceDetails']->customer_id;
@@ -935,6 +974,7 @@ else{
 		$data['office_location'] = $this->db->get_where('office_master',array('office_id'=>$office_id))->row();
 		$data['paymenttype_details'] = $this->db->get_where('invoice_showroom_payment_mode_'.$office_id,array('invoice_id'=>$invoiceId))->result();
 		
+	//		echo "<pre>";print_r($data['paymenttype_details']); die;
 		//$this->load->view('inventory/sales_invoice_receipt',$data);
 		$this->load->view('inventory/view_invoice',$data);
 	}
@@ -1113,9 +1153,12 @@ public function delete_invoice_data()
 		{
 			//$this->db->delete($table_history,array('transaction_number'=>$invoice_data->invoice_number));
 		
-		
+		 $delete_data = array('is_deleted'=>'1',
+			'delete_by_user'=>$this->session->userdata('user_id'),
+			'deleted_date'=>date('Y-m-d H:i:s')
+			 );
 		//$this->db->delete('invoice_'.$office_operation_type.'_payment_mode_'.$office_id,array('invoice_id'=>$invoice_data->invoice_id));
-		 $this->db->update('invoice_'.$office_operation_type.'_payment_mode_'.$office_id,array('is_deleted'=>'1'),array('invoice_id'=>$invoice_data->invoice_id));
+		 $this->db->update('invoice_'.$office_operation_type.'_payment_mode_'.$office_id,$delete_data,array('invoice_id'=>$invoice_data->invoice_id));
 	
 		$invoice_product_data=$this->db->get_where($table_productinvoice,array('invoice_id'=>$invoice_id))->result();
 		foreach($invoice_product_data as $value)
@@ -1129,7 +1172,12 @@ public function delete_invoice_data()
 					$this->db->update($table_current_serials,array('current_stock_status'=>'0'),array('product_serial_number'=>$value_serials->serial_number));
 				}
 			//	$this->db->delete($table_productserialinvoice,array('invoice_product_id'=>$value->invoice_product_id));
-				$this->db->update($table_productserialinvoice,array('is_deleted'=>'1'),array('invoice_product_id'=>$value->invoice_product_id));
+			
+			 $delete_data = array('is_deleted'=>'1',
+			'delete_by_user'=>$this->session->userdata('user_id'),
+			'deleted_date'=>date('Y-m-d H:i:s'),
+			 );
+				$this->db->update($table_productserialinvoice,$delete_data,array('invoice_product_id'=>$value->invoice_product_id));
 				if($flag==1)
 				{
 					$arr_current_value=$this->db->get_where($table_current,array('product_id'=>$value->product_id))->row();
@@ -1152,10 +1200,22 @@ public function delete_invoice_data()
 					$this->base_model->insert_one_row($table_history,$historyData);
 				}
 		}
+		     $delete_data=array('is_deleted'=>'1',
+			'delete_by_user'=>$this->session->userdata('user_id'),
+			'deleted_date'=>date('Y-m-d H:i:s')
+			
+			
+			);
 		//$this->db->delete($table_productinvoice,array('invoice_id'=>$invoice_id));
-			$this->db->update($table_productinvoice,array('is_deleted'=>'1'),array('invoice_id'=>$invoice_id));
+			$this->db->update($table_productinvoice,$delete_data,array('invoice_id'=>$invoice_id));
 			//$this->db->delete($table_invoice,array('invoice_id'=>$invoice_id));
-			$this->db->update($table_invoice,array('is_deleted'=>'1'),array('invoice_id'=>$invoice_id));
+			$delete_data=array('is_deleted'=>'1',
+			'delete_by_user'=>$this->session->userdata('user_id'),
+			'deleted_date'=>date('Y-m-d H:i:s')
+			
+			
+			);
+			$this->db->update($table_invoice,$delete_data,array('invoice_id'=>$invoice_id));
 
 			echo '1';	
 			
@@ -1241,16 +1301,44 @@ $invoiceId = base64_decode($_POST['invoice_id']);
 				
 				foreach($_POST['payment_mode'] as $key=>$value)
 				{
-					if(empty($_POST['customer_pan_number']) && $value=='cash' && $_POST['payment_mode_amount'][$key]>=200000){
+					// && $value=='cash'
+					/*if(empty($_POST['customer_pan_number']) && $_POST['payment_mode_amount'][$key]>=200000){
 				//if(empty($_POST['customer_pan_number']) && $_POST['total_net_amount']>=200000) 
 				$errors['customer_pan_number'] = 'PAN Number required';
 				}
-				if(empty($_POST['id_proof']) && isset($_POST['id_proof']) && $value=='cash'  &&  $_POST['payment_mode_amount'][$key]>=50000) {
+				//&& $value=='cash'
+				if(empty($_POST['id_proof']) && isset($_POST['id_proof']) &&  $_POST['payment_mode_amount'][$key]>=50000) {
 				$errors['id_proof'] = 'ID Proof required';
 				}
-				if(empty($_POST['id_proof_number']) && $value=='cash'  &&  $_POST['payment_mode_amount'][$key]>=50000) {
+				//&& $value=='cash'
+				if(empty($_POST['id_proof_number']) && $_POST['payment_mode_amount'][$key]>=50000) {
 				$errors['id_proof_number'] = 'ID Proof Number required';
-				}
+				}*/
+				
+				
+				if( $_POST['payment_mode_amount'][$key]>=200000){
+				//if(empty($_POST['customer_pan_number']) && $_POST['total_net_amount']>=200000) 
+					if(empty($_POST['customer_pan_number']))
+					{
+				     $errors['customer_pan_number'] = 'PAN Number required';
+					}
+					else{
+						if (!preg_match("/^([a-zA-Z]){5}([0-9]){4}([a-zA-Z]){1}?$/", $_POST['customer_pan_number'])) {
+						   $errors['customer_pan_number'] = "Invalid pan number";
+						}
+					}
+				  }else{
+					  
+					  //&& $value=='cash' 
+					if(empty($_POST['id_proof']) && isset($_POST['id_proof']) &&  $_POST['payment_mode_amount'][$key]>=50000) {
+					$errors['id_proof'] = 'ID Proof required';
+					}
+					//&& $value=='cash'
+					if(empty($_POST['id_proof_number'])  &&  $_POST['payment_mode_amount'][$key]>=50000) {
+					$errors['id_proof_number'] = 'ID Proof Number required';
+					}
+				  }
+				
 				}
 				//$arr_selected_product_divs=explode(",",$_POST['selected_products_divs']);
 				//print_r($arr_selected_product_divs);
@@ -1294,7 +1382,14 @@ $invoiceId = base64_decode($_POST['invoice_id']);
 						  if(empty($_POST['card_check_name'][$key]))
 							  {
 								 
-								   $errors['card_check_name_'.$key] = 'Card name is required';				
+								   $errors['card_check_name_'.$key] = 'Card name is required';	
+								   			
+							  }
+							  
+							   if(empty($_POST['card_issuing_bank'][$key]))
+							  {
+								 
+								  $errors['card_issuing_bank_'.$key] = 'Issuing bank number is required';
 							  }
 					   }
 					  if(empty($_POST['payment_mode_amount'][$key])){
@@ -1309,6 +1404,10 @@ $invoiceId = base64_decode($_POST['invoice_id']);
 					  if(empty($_POST['card_check_number'][$key])){
 						$errors['card_check_number_'.$key] = 'Please enter '.$value.' is required';				
 					  }
+					  if(empty($_POST['card_issuing_bank'][$key])){
+						  $errors['card_issuing_bank_'.$key] = 'Issuing bank number is required';
+						  
+						 }
 					  elseif($value=='credit card' || $value=='debit card')
 					  {
 						  if(strlen($_POST['card_check_number'][$key])>4)
@@ -1320,7 +1419,12 @@ $invoiceId = base64_decode($_POST['invoice_id']);
 					  
 					  }
 					
-					
+					  if($value=='cheque'){
+					 if($_POST['cheque_relese'][$key] =='select'){
+						$errors['cheque_relese_'.($key+$already_paid)] = 'Cheque Realization is required';		
+						
+					  }
+				   }
 					
 					  
 				}
@@ -1354,10 +1458,9 @@ $invoiceId = base64_decode($_POST['invoice_id']);
 		$customer_pan_number = $this->input->post('customer_pan_number');
 		$id_proof = $this->input->post('id_proof');
 		$id_proof_number = $this->input->post('id_proof_number');
-		$state = $this->input->post('state');
-		$district = $this->input->post('district');
-		$city = $this->input->post('city');
-		$modal_customer_pincode = $this->input->post('modal_customer_pincode');
+		$showrom_invoice_narrative = $this->input->post('showrom_invoice_narrative');
+		$customer_transaction_id = $this->input->post('customer_transaction_id');
+		
 		
 		$table_invoice='invoice_'.$office_operation_type.'_'.$office_id;
 		$table_productinvoice='invoice_'.$office_operation_type.'_product_'.$office_id;
@@ -1455,6 +1558,8 @@ $customerInsertData = array('modal_customer_name'=>$customer_name,
         
 		$quantity = $this->input->post('quantity');
 		$invoice_type = $this->input->post('invoice_type');
+		$showrom_invoice_narrative = $this->input->post('showrom_invoice_narrative');
+		$customer_transaction_id = $this->input->post('customer_transaction_id');
 		$weight = $this->input->post('weight');
 		$rate_per_quantity = $this->input->post('rate_per_quantity');
 		$discount_percent = $this->input->post('discount_percent');
@@ -1469,24 +1574,14 @@ $customerInsertData = array('modal_customer_name'=>$customer_name,
        //'adjustment'=>$round_off,
 		$amount_refunded = ($this->input->post('amount_refunded')) ? $this->input->post('amount_refunded') : '0';
 	
-		$invoiceInsertData = array('invoice_type'=>$invoice_type,
+		$invoiceInsertData = array(
+		                            'invoice_type'=>$invoice_type,
+		                            'showrom_invoice_narrative'=>$showrom_invoice_narrative,
 									'customer_id' => $customer_id,
 									'total_amount' => $total_amount,
 									'surcharge_on_vat' => $surcharge_on_vat,
 									'amount_received' => $received_amount,
 									'amount_refunded' =>$amount_refunded,
-									'customer_name' =>$customer_name,
-									'customer_address' =>$customer_address,
-									'customer_phone_number' =>$customer_phone_number,
-									'customer_mobile_number' =>$customer_phone_number,
-									'customer_email_id' =>$customer_email_id,
-									'customer_pan_number' =>$customer_pan_number,
-									'customer_id_proof' =>$id_proof,
-									'customer_state' =>$state,
-									'customer_district' =>$district,
-									'customer_city' =>$city,
-									'customer_pincode' =>$modal_customer_pincode,
-									'customer_id_proof_number' =>$id_proof_number,
 									'creator_id' => $this->session->userdata('user_id'),
 									);
          
@@ -1583,6 +1678,7 @@ if($received_amount>=$total_net_amount)
 		$payment_mode = $this->input->post('payment_mode');
 		$card_check_number = $this->input->post('card_check_number');
 		$card_check_name = $this->input->post('card_check_name');
+		$card_issuing_bank = $this->input->post('card_issuing_bank');
 		
 		foreach($payment_mode as $key=>$pm)
 		{
@@ -1591,6 +1687,7 @@ if($received_amount>=$total_net_amount)
 									'payment_amount' => $payment_mode_amount[$key],
 									'card_cheque_number' => $card_check_number[$key],
 									'bank_name'=>$card_check_name[$key],
+									'card_issuing_bank'=>$card_issuing_bank[$key],
 									'creator_id' => $this->session->userdata('user_id'),
 									'createdOn' => date('Y-m-d H:i:s'),									
 									);
@@ -1607,5 +1704,154 @@ if($received_amount>=$total_net_amount)
 	}
 	
 }
+
+//function insert_new_colums_in_table(){
+	
+	//$users_master = $this->db->query("select office_id,office_operation_type from office_master where office_operation_type='showroom'")->result();
+	
+	//if(!empty($users_master)){
+		
+		//foreach($users_master as $row){
+			//if($row->office_operation_type=='showroom'){
+				//$office_id= $row->office_id;
+				//$this->db->query('ALTER TABLE invoice_showroom_payment_mode_'.$office_id.' ADD `card_issuing_bank` VARCHAR(150) NULL DEFAULT NULL AFTER `card_cheque_number`');
+				
+			//}else{
+				
+		         //continue;		
+				//}
+			
+			
+		//}
+		
+		//}else{
+			//echo "not_match";
+			//exit;
+			
+			//}
+	
+
+	
+	//}
+	
+	
+	
+	//function insert_new_colums_in_table_delete_by_user(){
+	
+	//$users_master = $this->db->query("select office_id,office_operation_type from office_master where office_operation_type='showroom'")->result();
+	
+	//if(!empty($users_master)){
+		
+		//foreach($users_master as $row){
+			//if($row->office_operation_type=='showroom'){
+				//$office_id= $row->office_id;
+				//$this->db->query('ALTER TABLE invoice_showroom_payment_mode_'.$office_id.' ADD `delete_by_user` BIGINT(20) NULL DEFAULT NULL AFTER `is_deleted`');
+				////ALTER TABLE `invoice_showroom_payment_mode_3` ADD `delete_by_user` BIGINT(20) NULL DEFAULT NULL AFTER `is_deleted`;
+			//}else{
+				
+		         //continue;		
+				//}
+			
+			
+		//}
+		
+		//}else{
+			//echo "not_match";
+			//exit;
+			
+			//}
+	
+
+	
+	//}
+	
+		//function insert_new_colums_in_table_delete_date(){
+	
+	//$users_master = $this->db->query("select office_id,office_operation_type from office_master where office_operation_type='showroom'")->result();
+	
+	//if(!empty($users_master)){
+		
+		//foreach($users_master as $row){
+			//if($row->office_operation_type=='showroom'){
+				//$office_id= $row->office_id;
+				//$this->db->query('ALTER TABLE invoice_showroom_payment_mode_'.$office_id.' ADD `deleted_date` DATETIME NULL DEFAULT NULL AFTER `delete_by_user`');
+				////ALTER TABLE `invoice_showroom_payment_mode_3` ADD `deleted_date` DATETIME NULL DEFAULT NULL AFTER `delete_by_user`;
+			//}else{
+				
+		         //continue;		
+				//}
+			
+			
+		//}
+		
+		//}else{
+			//echo "not_match";
+			//exit;
+			
+			//}
+	
+
+	
+	//}
+	
+		//function insert_new_colums_showroom_product_delete_date(){
+	
+	//$users_master = $this->db->query("select office_id,office_operation_type from office_master where office_operation_type='showroom'")->result();
+	
+	//if(!empty($users_master)){
+		
+		//foreach($users_master as $row){
+			//if($row->office_operation_type=='showroom'){
+				//$office_id= $row->office_id;
+				////$this->db->query('ALTER TABLE invoice_showroom_'.$office_id.'  ADD  `delete_by_user`  BIGINT(20)  NULL DEFAULT NULL AFTER `is_deleted`');
+				//$this->db->query('ALTER TABLE invoice_showroom_'.$office_id.'  ADD  `deleted_date`  DATETIME  NULL DEFAULT NULL AFTER `delete_by_user`');
+			//}else{
+				
+		        //continue;		
+				//}
+			
+			
+		//}
+		
+		//}else{
+			//echo "not_match";
+			//exit;
+			
+			//}
+	
+
+	
+	//}
+	
+	
+	//function insert_new_colums_in_table(){
+	
+	//$users_master = $this->db->query("select office_id,office_operation_type from office_master where office_operation_type='showroom'")->result();
+	
+	//if(!empty($users_master)){
+		
+		//foreach($users_master as $row){
+			//if($row->office_operation_type=='showroom'){
+				//$office_id= $row->office_id;
+				//$this->db->query('ALTER TABLE invoice_showroom_'.$office_id.' ADD `customer_transaction_id` VARCHAR(60) NULL DEFAULT NULL AFTER `showrom_invoice_narrative`');
+				
+			//}else{
+				
+		         //continue;		
+				//}
+			
+			
+		//}
+		
+		//}else{
+			//echo "not_match";
+			//exit;
+			
+			//}
+	
+
+	
+	//}
+
 	
 }

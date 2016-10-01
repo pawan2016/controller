@@ -103,7 +103,7 @@ class Login extends CI_Controller {
 				
 				if(!empty($dataSession))
 				{
-					$this->session->set_userdata("SuccessMessage", 'Your have already logged-in.');
+					$this->session->set_userdata("SuccessMessage", 'You have already logged-in.');
 					redirect('login');					
 				}
 				
@@ -131,7 +131,7 @@ class Login extends CI_Controller {
 							}
 						}
 						else{
-							$this->session->set_userdata("SuccessMessage", 'Your have already logged-in.');
+							$this->session->set_userdata("SuccessMessage", 'You have already logged-in.');
 							redirect('login');
 						}
 					}else{
@@ -190,8 +190,6 @@ class Login extends CI_Controller {
 				$message="Dear user,OTP For Your Change Password towards mmtc ".$otpNumber;
 				$phone_number = $result->user_mobile_number;
 				$userId=$result->user_id;
-				
-				
 				$this->opt_send_new_sms($message,$phone_number);
 				if(isset($phone_number) && !empty($otpNumber)){
 					$opt_data = array('user_otp_number'=>$otpNumber,'user_otp_time'=>$datetime,'user_otp_attemp'=>$otpattempt);
@@ -221,59 +219,28 @@ class Login extends CI_Controller {
 	}
 	// added by anil chauhan
 	function opt_send_new_sms($message, $phone_number) {
-		$url = 'https://smsgw.sms.gov.in/failsafe/HttpLink?username=igcotp.sms&pin=Yr*6bN%232xA&message='.urlencode($message).'&mnumber=91'.$phone_number.'&signature=NICSMS';
-		$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_HEADER, 0);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,false);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST,1);
-	if (curl_errno($ch)) echo 'Curl error: ' . curl_error($ch);
-	else { $curl_output =curl_exec($ch); echo 'curl output'.$curl_output; }
-		//echo file_get_contents('https://smsgw.sms.gov.in/failsafe/HttpLink?username=igcotp.sms&pin=Yr*6bN%232xA&message='.urlencode($message).'&mnumber=91'.$phone_number.'&signature=NICSMS');
-		/*$mob='91'.trim($phone_number);
-	$tst='test sms';
-	$uid=urlencode("igcotp.sms");
-	$pass="Yr*6bN%232xA";
-	$send=urlencode("NICSMS"); // 6 characters long SENDERID
-	$dest=urlencode($mob);
-	$msg=urlencode($message);
-	$url="https://smsgw.sms.gov.in/failsafe/HttpLink?";
-	$data = "username=$uid&pin=$pass&message=$msg&mnumber=$dest&signature=$send";
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_HEADER, 0);
- 	curl_setopt($ch, CURLOPT_POST, 1);
- 	curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,false);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST,1);
-	curl_setopt($ch, CURLOPT_CAINFO,'/etc/pki/tls/certs/ca-bundle.crt');
-	if (curl_errno($ch)) echo 'Curl error: ' . curl_error($ch);
-	else $curl_output =curl_exec($ch);
-	curl_close($ch);*/
-   /*$data = array (
-       "username" => "igcotp.sms", // type your assigned username here(for example:"username" => "CDACMUMBAI")
-       "pin" => 'Yr*6bN%232xA', // type your password
-       "signature" => "NICSMS", // type your senderID
-		//"smsservicetype" => "singlemsg", // *Note* for single sms enter singlemsg , for bulk enter bulkmsg
-       "mnumber" => '91'.trim($phone_number), // enter the mobile number
-     //  "bulkmobno" => "", // enter mobile numbers separated by commas for bulk sms otherwise leave it blank
-       "message" => urlencode($message)
+   $data = array (
+       "username" => "DIGITALINDIA-DEV", // type your assigned username here(for example:"username" => "CDACMUMBAI")
+       "password" => '$DI2014', // type your password
+       "senderid" => "DIPROG", // type your senderID
+		"smsservicetype" => "singlemsg", // *Note* for single sms enter singlemsg , for bulk enter bulkmsg
+       "mobileno" => trim($phone_number), // enter the mobile number
+       "bulkmobno" => "", // enter mobile numbers separated by commas for bulk sms otherwise leave it blank
+       "content" => $message
    ) // type the message.
   ;
    // post_to_url("http://msdgweb.mgov.gov.in/esms/sendsmsrequest", $data);
  
-   $url = "https://smsgw.sms.gov.in/failsafe/HttpLink";
+   $url = "http://msdgweb.mgov.gov.in/esms/sendsmsrequest";
    $fields = '';
    foreach ( $data as $key => $value ) {
      $fields .= $key . '=' . $value . '&';
    }
    rtrim ( $fields, '&' );
    $post = curl_init ();
-   curl_setopt ( $post, CURLOPT_URL, $url.'?'.$fields );
-   //curl_setopt ( $post, CURLOPT_POST, count ( $data ) );
-  // curl_setopt ( $post, CURLOPT_POSTFIELDS, $fields );
+   curl_setopt ( $post, CURLOPT_URL, $url );
+   curl_setopt ( $post, CURLOPT_POST, count ( $data ) );
+   curl_setopt ( $post, CURLOPT_POSTFIELDS, $fields );
    curl_setopt ( $post, CURLOPT_RETURNTRANSFER, 1 );
    $result = curl_exec ( $post );
    if ($result) {
@@ -283,7 +250,7 @@ class Login extends CI_Controller {
    }else {
 	print_r ( 'unable to send sms' ) ;
    }
-   curl_close ( $post );*/
+   curl_close ( $post );
 }
 	// ending the msg code
 	public function firstStepToSetPassword(){
@@ -596,8 +563,8 @@ class Login extends CI_Controller {
 https://smsgw.sms.gov.in/failsafe/HttpLink?username=xxxxxx&pin=xxxxxxx&message=message&mnumber=91XXXXXXXXXX&signature=SENDERID  
  */
 		$data = array (
-				   "username" => "igcotp.sms", // type your assigned username here(for example:"username" => "CDACMUMBAI")
-				   "pin" => urlencode('Yr*6bN#2xA'), // type your password
+				   "username" => "igc.sms", // type your assigned username here(for example:"username" => "CDACMUMBAI")
+				   "pin" => 'Yr*6bN#2xA', // type your password
 				   "signature" => "NICSMS", // type your senderID
 				   "mnumber" => '91'.trim($phone_number), // enter the mobile number
 				   "message" =>  urlencode($message)
