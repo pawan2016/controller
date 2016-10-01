@@ -940,12 +940,13 @@ class User extends CI_Controller {
 					foreach($office_array as $key=>$user_location)
 					{
 						$ofice_id_data=$user_location;
-						$rolepremisstionid=$role_permission_id[$key];
 						$regional_store_id='0';
 						if($region_id[$key]!='' && $ofice_id_data=='1')
 						{
 							$regional_store_id=$region_id[$key];
 						}
+						
+						$rolepremisstionid=$role_permission_id[$key];
 						$insertarray=array('user_id'=>$userId,'office_id'=>$ofice_id_data,'role_permission_id'=>$rolepremisstionid,'regional_store_id'=>$regional_store_id,'creator_id'=>$creator_id,'createdOn'=>$createdOn);
 						$this->db->insert('user_role_permission_master',$insertarray);
 						
@@ -1173,7 +1174,28 @@ class User extends CI_Controller {
 		{
 		$this->load->view("includes/_header",$header);
 		$this->load->view("includes/_top_menu");
-		$data['activityLists'] = $this->db->select('uam.createdOn,uam.activity,uam.action,um.user_name')->from('users_activity_master as uam')->join('users_master as um','um.user_id=uam.user_id','left')->order_by('uam.createdOn','DESC')->get()->result();
+		if($_POST){
+			if(!empty($_POST['right_from'])){
+			 $fromDate = explode('/',$_POST['right_from']);	
+			 $start_date = $fromDate[2].'-'.$fromDate[1].'-'.$fromDate[0].' 00:00:00';
+			}else{
+			 $start_date =date('Y-m-d').' 00:00:00';
+				
+			}
+			
+		   if(!empty($_POST['right_to'])){
+			 $to_date = explode('/',$_POST['right_to']);
+			 $end_date = $to_date[2].'-'.$to_date[1].'-'.$to_date[0].' 23:59:59';	
+			}else{
+			$end_date =date('Y-m-d').' 23:59:59';
+				
+			}
+			$data['activityLists'] = $this->db->query("select uam.createdOn,uam.activity,uam.action,um.user_name from users_activity_master as uam left join users_master as um on um.user_id = uam.user_id where uam.createdOn >='".$start_date."' AND uam.createdOn <='".$end_date."' order by uam.createdOn DESC")->result();
+			$data['from_date'] = $_POST['right_from'];
+			$data['to_date'] = $_POST['right_to'];
+		   }else{
+		   $data['activityLists'] = $this->db->select('uam.createdOn,uam.activity,uam.action,um.user_name')->from('users_activity_master as uam')->join('users_master as um','um.user_id=uam.user_id','left')->order_by('uam.createdOn','DESC')->get()->result();		
+		   }
 		$this->load->view('user/user_activity',$data);
 		$this->load->view('includes/_footer');
 		}else{
@@ -1211,4 +1233,5 @@ class User extends CI_Controller {
 		echo $this->load->view('includes/_AjaxAddNewDivCommon',$data1,true);
 		
    }
+	
 }

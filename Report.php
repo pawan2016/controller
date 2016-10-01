@@ -6,7 +6,9 @@ class Report extends CI_Controller {
 	
 	public function __construct() {
         parent::__construct();
+		
         sessionExist();
+		
 		$this->load->model('inventory_model');
 		$this->load->model('Report_model');
 		$this->load->model('base_model');
@@ -18,7 +20,7 @@ class Report extends CI_Controller {
 	public function price_report()
 	{   
 		$header['title'] = "Price Report";
-		$user_id=$this->session->userdata('user_id');
+			$user_id=$this->session->userdata('user_id');
 			$role_permission_id=$this->session->userdata('role_permission_id');
 			$office_id=$this->session->userdata('office_id');
 			$user_role_data=$this->db->get_where('user_role_permission_master',array('user_id'=>$user_id,'role_permission_id'=>$role_permission_id,'office_id'=>$office_id))->row();
@@ -256,26 +258,24 @@ class Report extends CI_Controller {
 	public function admin_transactionreport()
 	{  
 		$header['title'] = "Transaction Report";
-
-		$user_id=$this->session->userdata('user_id');
+		
+		 //print_r($postedArr);die;
+	   $user_id=$this->session->userdata('user_id');
 			$role_permission_id=$this->session->userdata('role_permission_id');
 			$office_id=$this->session->userdata('office_id');
 			$user_role_data=$this->db->get_where('user_role_permission_master',array('user_id'=>$user_id,'role_permission_id'=>$role_permission_id,'office_id'=>$office_id))->row();
-		 //print_r($postedArr);die;
-	   if(!empty($user_role_data) && $user_role_data->regional_store_id>0)
+		
+if(!empty($user_role_data) && $user_role_data->regional_store_id>0)
 		{
 			$_POST['region_id']=$user_role_data->regional_store_id;
 			$_POST['submit']=true;
-			
 			if($this->input->post('access_right_from')=='' && $this->input->post('access_right_to')=='')
 			{
 				$_POST['access_right_from']=date('d/m/Y',strtotime('now'));
 				$_POST['access_right_to']=date('d/m/Y',strtotime('now'));
 			}
-			
-		
 		}
-				$postedArr  = $this->security->xss_clean($_POST);
+		$postedArr  = $this->security->xss_clean($_POST);		
 	    $fromDate1 = date('d/m/Y',strtotime('now'));
 		$toDate1 = date('d/m/Y',strtotime('now'));
 		
@@ -343,11 +343,13 @@ class Report extends CI_Controller {
 		if(!empty($user_role_data) && $user_role_data->regional_store_id>0)
 		{
 		$data['region_master']= $this->db->select('*')->from('regional_store_master')->where(array('regional_store_id'=>$user_role_data->regional_store_id))->get()->result();
+	
 		}
 		else
 		{
-	    $data['region_master']= $this->base_model->get_all_records('regional_store_master');
+			$data['region_master']= $this->db->select('*')->from('regional_store_master')->get()->result();
 		}
+	    
 	   // $data['transfer_to']= $this->db->where('office_id !=',1)->get('office_master')->result();
 		$this->db->select("office_master.*,regional_store_master.regional_store_type");
 		$this->db->from("office_master ","regional_store_master");
@@ -358,6 +360,7 @@ class Report extends CI_Controller {
 		{
 		$this->db->where("regional_store_master.regional_store_id",$user_role_data->regional_store_id);
 		}
+		
 		$query = $this->db->get();
 		$data['transfer_to']=$query->result();
 		
@@ -366,7 +369,7 @@ class Report extends CI_Controller {
 		
 		$data['fromDateWhere'] = $fromDateWhere;
 		$data['toDateWhere'] = $toDateWhere;
-		
+		$data['regional_store_id'] = $user_role_data->regional_store_id;
 		$this->load->view("includes/_header",$header);
         $this->load->view("includes/_top_menu");
 		if(!empty($user_role_data) && $user_role_data->regional_store_id>0)
@@ -376,8 +379,9 @@ class Report extends CI_Controller {
 		}
 	    else
 		{
-	    $this->load->view('report/admin_transactionreport',$data);
+			$this->load->view('report/admin_transactionreport',$data);
 		}
+	  //  $this->load->view('report/admin_transactionreport',$data);
 		$this->load->view('includes/_footer');
 	}
 	
@@ -408,13 +412,13 @@ class Report extends CI_Controller {
 		{
 			redirect(base_url('user/dashboard'));
 		}
-		$user_id=$this->session->userdata('user_id');
+			$user_id=$this->session->userdata('user_id');
 			$role_permission_id=$this->session->userdata('role_permission_id');
 			$office_id=$this->session->userdata('office_id');
 			$user_role_data=$this->db->get_where('user_role_permission_master',array('user_id'=>$user_id,'role_permission_id'=>$role_permission_id,'office_id'=>$office_id))->row();
+			
 		$header['title'] = "Schedule Report";
 		$postedArr  = $this->security->xss_clean($_POST);
-		
 		 // print_r($postedArr);
 		$regionData = $this->db->get('regional_store_master')->result();
 		$regional_ids = array();
@@ -487,7 +491,7 @@ class Report extends CI_Controller {
 		}
 	    else
 		{
-			$this->load->view('report/schedule_report',$data);
+	        $this->load->view('report/schedule_report',$data);
 		}
 		$this->load->view('includes/_footer');
 	}
@@ -557,10 +561,12 @@ class Report extends CI_Controller {
 		{
 			redirect(base_url('user/dashboard'));
 		}
-		$user_id=$this->session->userdata('user_id');
+		
+			$user_id=$this->session->userdata('user_id');
 			$role_permission_id=$this->session->userdata('role_permission_id');
 			$office_id=$this->session->userdata('office_id');
 			$user_role_data=$this->db->get_where('user_role_permission_master',array('user_id'=>$user_id,'role_permission_id'=>$role_permission_id,'office_id'=>$office_id))->row();
+		
 		$header['title'] = "Sales Report";
 		$postedArr  = $this->security->xss_clean($_POST);
 		 // print_r($postedArr);
@@ -621,15 +627,14 @@ class Report extends CI_Controller {
 		$data['fromDate'] = date('d/m/Y',strtotime($fromDate));
 		$data['toDate'] = date('d/m/Y',strtotime($toDate));
 		
-		$office_ids = (isset($postedArr['office_location']) && !empty($postedArr['office_location'][0])) ? $postedArr['office_location'] : '';
-
-		if(!empty($office_ids[0])){
+		$office_ids = (isset($postedArr['office_location'])) ? $postedArr['office_location'] : '';
+		if(!empty($office_ids)){
 			foreach($office_ids as $office_id)
 			{
 				$office_names[] = getOfficeLocation($office_id);
 			}
 		}
-		if(!empty($regional_ids[0])){
+		if(!empty($regional_ids)){
 			foreach($regional_ids as $region_id)
 			{
 				$region_names[] = getRegionLocation($region_id);
@@ -643,11 +648,11 @@ class Report extends CI_Controller {
 		
 		
 		$data['get_all_record']=$this->Report_model->_get_sales_report($fromDate,$toDate,$office_ids,$regional_ids);
-		$data['all_products'] = $productLists = $this->db->get('product_master')->result();
-		
+		$data['all_products'] = $productLists = $this->db->get_where('product_master',array('product_type_id'=>'1'))->result();
 		$data['regional_store_id'] = $user_role_data->regional_store_id;
-		// echo '<pre>';
-		// print_r($data['get_all_record']);
+		
+		 //echo '<pre>';
+		 //print_r($data['get_all_record']);
 		// echo '</pre>';
 		$this->load->view("includes/_header",$header);
         $this->load->view("includes/_top_menu");
@@ -657,7 +662,8 @@ class Report extends CI_Controller {
 		}
 	    else
 		{
-	    $this->load->view('report/sales_report',$data);
+			$this->load->view('report/sales_report',$data);
+			
 		}
 		$this->load->view('includes/_footer');
 	}
@@ -847,14 +853,15 @@ class Report extends CI_Controller {
 		{
 			redirect(base_url('user/dashboard'));
 		}
-		$user_id=$this->session->userdata('user_id');
+			$user_id=$this->session->userdata('user_id');
 			$role_permission_id=$this->session->userdata('role_permission_id');
 			$office_id=$this->session->userdata('office_id');
 			$user_role_data=$this->db->get_where('user_role_permission_master',array('user_id'=>$user_id,'role_permission_id'=>$role_permission_id,'office_id'=>$office_id))->row();
+			
 		$header['title'] = "Payment Mode Report";
 		$postedArr  = $this->security->xss_clean($_POST);
 		 // print_r($postedArr);
-		 if(!empty($user_role_data) && $user_role_data->regional_store_id>0)
+		if(!empty($user_role_data) && $user_role_data->regional_store_id>0)
 		{
 			$regionData = $this->db->get_where('regional_store_master',array('regional_store_type'=>'others','regional_store_id'=>$user_role_data->regional_store_id))->result();	
 		}
@@ -862,10 +869,11 @@ class Report extends CI_Controller {
 		{
 			$regionData = $this->db->get('regional_store_master')->result();
 		}
+		
 		$regional_ids = array();
 		$region_names = array();
 		$office_names = array();
-		
+	
 		foreach($regionData as $region)
 		{
 			$regional_ids [] = 	$region->regional_store_id;
@@ -1314,20 +1322,33 @@ class Report extends CI_Controller {
 		{
 			redirect(base_url('user/dashboard'));
 		}
+			$user_id=$this->session->userdata('user_id');
+			$role_permission_id=$this->session->userdata('role_permission_id');
+			$office_id=$this->session->userdata('office_id');
+			$user_role_data=$this->db->get_where('user_role_permission_master',array('user_id'=>$user_id,'role_permission_id'=>$role_permission_id,'office_id'=>$office_id))->row();
+		
 		$header['title'] = "Sale & Inventory Report";
 		$postedArr  = $this->security->xss_clean($_POST);
-		//print_r($postedArr);
+		// print_r($postedArr);
 		$regionData = $this->db->get('regional_store_master')->result();
 		$regional_ids = array();
-		
+		$where_others=array('regional_store_type'=>'others');
+		if(!empty($user_role_data) && $user_role_data->regional_store_id>0)
+		{
+			$postedArr['region_type']="others";
+			$where_others=array('regional_store_type'=>'others','regional_store_id'=>$user_role_data->regional_store_id);
+		}
 		if($postedArr['region_type'] == "all"){
+			
 			$regionData = $this->db->select('*')->from('regional_store_master')->get()->result();
 		}
 		else if($postedArr['region_type'] == "mmtc"){
+			
 			$regionData = $this->db->select('*')->from('regional_store_master')->where(array('regional_store_type'=>'mmtc'))->get()->result();
 		}
 		else if($postedArr['region_type'] == "others"){
-			$regionData = $this->db->select('*')->from('regional_store_master')->where(array('regional_store_type'=>'others'))->get()->result();
+			
+			$regionData = $this->db->select('*')->from('regional_store_master')->where($where_others)->get()->result();
 		}
 		// print_r($regionData);
 		foreach($regionData as $region)
@@ -1391,20 +1412,30 @@ class Report extends CI_Controller {
 			$reportDate = date('Y-m-d',strtotime('now'));
 		}
 		$report_Date = date( 'Y-m-d', strtotime( $reportDate . ' -1 day' ) );
+		//$report_Date = date( 'Y-m-d', strtotime( $reportDate) );
 		$report_Date2 = date( 'Y-m-d', strtotime( $reportDate ) );
 		
 		$data['fromDate'] = date('d/m/Y',strtotime($fromDate));
 		$data['toDate'] = date('d/m/Y',strtotime($toDate));
-		$data['all_products'] = $productLists = $this->db->get('product_master')->result();
+		$data['all_products'] = $productLists = $this->db->get_where('product_master',array('product_type_id'=>'1'))->result();
+		
 		$data['get_all_record']=$this->Report_model->_get_sold_and_inventory_report($report_Date,$fromDate,$toDate,$office_ids,$regional_ids);
 		$data['reportDate'] = date('d/m/Y',strtotime($reportDate));
 		$data['tbreportDate'] = date('d/m/Y',strtotime($reportDate));
 		// echo '<pre>';
 		// print_r($data['get_all_record']);
 		// echo '</pre>';
+		$data['regional_store_id'] = $user_role_data->regional_store_id;
 		$this->load->view("includes/_header",$header);
-		$this->load->view("includes/_top_menu");
-		$this->load->view('report/sold_and_inventory_report',$data);
+        $this->load->view("includes/_top_menu");
+		if(!empty($user_role_data) && $user_role_data->regional_store_id>0)
+		{
+			$this->load->view('report/sold_and_inventory_region_report',$data);
+		}
+		else
+		{
+			 $this->load->view('report/sold_and_inventory_report',$data);
+		}
 		$this->load->view('includes/_footer');
 	}
 	
@@ -1414,6 +1445,7 @@ class Report extends CI_Controller {
 		{
 			redirect(base_url('user/dashboard'));
 		}
+		
 		$header['title'] = "Tax Transaction Report";
 		$user_id=$this->session->userdata('user_id');
 			$role_permission_id=$this->session->userdata('role_permission_id');
@@ -1588,8 +1620,246 @@ class Report extends CI_Controller {
 	    $this->load->view('report/transaction_tax_report',$data);
 		$this->load->view('includes/_footer');
 	}
-	public function stock_transfer_recieve_inventory(){
-if($this->session->userdata('role_id') > '1')
+	public function saleInventoryReportnew()
+	{
+		if($this->session->userdata('role_id') > '1')
+		{
+			redirect(base_url('user/dashboard'));
+		}
+			$user_id=$this->session->userdata('user_id');
+			$role_permission_id=$this->session->userdata('role_permission_id');
+			$office_id=$this->session->userdata('office_id');
+			$user_role_data=$this->db->get_where('user_role_permission_master',array('user_id'=>$user_id,'role_permission_id'=>$role_permission_id,'office_id'=>$office_id))->row();
+		
+		$header['title'] = "Sale & Inventory Report";
+		$postedArr  = $this->security->xss_clean($_POST);
+		// print_r($postedArr);
+		$regionData = $this->db->get('regional_store_master')->result();
+		$regional_ids = array();
+		$where_others=array('regional_store_type'=>'others');
+		if(!empty($user_role_data) && $user_role_data->regional_store_id>0)
+		{
+			$postedArr['region_type']="others";
+			$where_others=array('regional_store_type'=>'others','regional_store_id'=>$user_role_data->regional_store_id);
+		}
+		if($postedArr['region_type'] == "all"){
+			$regionData = $this->db->select('*')->from('regional_store_master')->get()->result();
+		}
+		else if($postedArr['region_type'] == "mmtc"){
+			$regionData = $this->db->select('*')->from('regional_store_master')->where(array('regional_store_type'=>'mmtc'))->get()->result();
+		}
+		else if($postedArr['region_type'] == "others"){
+			$regionData = $this->db->select('*')->from('regional_store_master')->where($where_others)->get()->result();
+		}
+		// print_r($regionData);
+		foreach($regionData as $region)
+		{
+			$regional_ids[] = 	$region->regional_store_id;
+		}
+		
+		$region_names = array();
+		$office_names = array();
+		
+		$regional_ids = (isset($postedArr['region_id']) && $postedArr['region_id'] !='') ? $postedArr['region_id'] : $regional_ids;
+		$data['regionLists'] = $regionData;
+		$data['transfer_to']=$this->inventory_model->showroom_office_location_list($regional_ids);
+		
+		$fromDate = '';
+		$toDate = '';
+		
+		if(isset($postedArr['fromDate']))
+		{
+			$fdate = explode('/',$postedArr['fromDate']);
+			$fromDate = $fdate[2].'-'.$fdate[1].'-'.$fdate[0].' 00:00:00';
+		}
+		else{
+			$fromDate = date('Y-m-d', strtotime( ' -1 day' )).' 00:00:00';
+		}
+		if(isset($postedArr['toDate']))
+		{
+			$tdate = explode('/',$postedArr['toDate']);
+			$toDate = $tdate[2].'-'.$tdate[1].'-'.$tdate[0].' 23:59:59';
+		}
+		else{
+			$toDate = date('Y-m-d', strtotime( ' -1 day' )).' 23:59:59';
+		}
+		
+		$office_ids = (isset($postedArr['office_location'])) ? $postedArr['office_location'] : '';
+		if(!empty($office_ids)){
+			foreach($office_ids as $office_id)
+			{
+				$office_names[] = getOfficeLocation($office_id);
+			}
+		}
+		
+		if(!empty($regional_ids)){
+			foreach($regional_ids as $region_id)
+			{
+				$region_names[] = getRegionLocation($region_id);
+			}
+		}
+		
+		$data['printOffice'] = (isset($postedArr['office_location'])) ? implode(',',$office_names) : 'All';
+		$data['printRegion'] = (isset($postedArr['region_id']) && $postedArr['region_id'] !='') ? implode(',',$region_names) : "All";
+		
+	//	$data['get_all_record']=$this->Report_model->_get_sales_report($fromDate,$toDate,$office_ids,$regional_ids);
+		
+		if(isset($postedArr['toDate']))
+		{
+			$fdate = explode('/',$postedArr['toDate']);
+			$reportDate = $fdate[2].'-'.$fdate[1].'-'.$fdate[0];
+		}
+		else{
+			$reportDate = date('Y-m-d',strtotime('now'));
+		}
+		$report_Date = date( 'Y-m-d', strtotime( $reportDate . ' -1 day' ) );
+		//$report_Date = date( 'Y-m-d', strtotime( $reportDate) );
+		$report_Date2 = date( 'Y-m-d', strtotime( $reportDate ) );
+		
+		$data['fromDate'] = date('d/m/Y',strtotime($fromDate));
+		$data['toDate'] = date('d/m/Y',strtotime($toDate));
+		$data['all_products'] = $productLists = $this->db->get_where('product_master',array('product_type_id'=>'1'))->result();
+		$data['get_all_record']=$this->Report_model->_get_sold_and_inventory_report_new($report_Date,$fromDate,$toDate,$office_ids,$regional_ids);
+		$data['reportDate'] = date('d/m/Y',strtotime($reportDate));
+		$data['tbreportDate'] = date('d/m/Y',strtotime($reportDate));
+		// echo '<pre>';
+		// print_r($data['get_all_record']);
+		// echo '</pre>';
+		$data['regional_store_id'] = $user_role_data->regional_store_id;
+		$this->load->view("includes/_header",$header);
+        $this->load->view("includes/_top_menu");
+		if(!empty($user_role_data) && $user_role_data->regional_store_id>0)
+		{
+			$this->load->view('report/sold_and_inventory_region_report_new',$data);
+		}
+		else
+		{
+			 $this->load->view('report/sold_and_inventory_report_new',$data);
+		}
+		$this->load->view('includes/_footer');
+	}
+	public function salesallreport()
+	{
+		if($this->session->userdata('role_id') > '1')
+		{
+			redirect(base_url('user/dashboard'));
+		}
+			$user_id=$this->session->userdata('user_id');
+			$role_permission_id=$this->session->userdata('role_permission_id');
+			$office_id=$this->session->userdata('office_id');
+			$user_role_data=$this->db->get_where('user_role_permission_master',array('user_id'=>$user_id,'role_permission_id'=>$role_permission_id,'office_id'=>$office_id))->row();
+		
+		$header['title'] = "Sale All Report";
+		$postedArr  = $this->security->xss_clean($_POST);
+		// print_r($postedArr);
+		$regionData = $this->db->get('regional_store_master')->result();
+		$regional_ids = array();
+		$where_others=array('regional_store_type'=>'others');
+		if(!empty($user_role_data) && $user_role_data->regional_store_id>0)
+		{
+			$postedArr['region_type']="others";
+			$where_others=array('regional_store_type'=>'others','regional_store_id'=>$user_role_data->regional_store_id);
+		}
+		if($postedArr['region_type'] == "all"){
+			$regionData = $this->db->select('*')->from('regional_store_master')->get()->result();
+		}
+		else if($postedArr['region_type'] == "mmtc"){
+			$regionData = $this->db->select('*')->from('regional_store_master')->where(array('regional_store_type'=>'mmtc'))->get()->result();
+		}
+		else if($postedArr['region_type'] == "others"){
+			$regionData = $this->db->select('*')->from('regional_store_master')->where($where_others)->get()->result();
+		}
+		 //print_r($regionData);
+		foreach($regionData as $region)
+		{
+			$regional_ids[] = 	$region->regional_store_id;
+		}
+		
+		$region_names = array();
+		$office_names = array();
+		
+		$regional_ids = (isset($postedArr['region_id']) && $postedArr['region_id'] !='') ? $postedArr['region_id'] : $regional_ids;
+		$data['regionLists'] = $regionData;
+		$data['transfer_to']=$this->inventory_model->showroom_office_location_list($regional_ids);
+		
+		$fromDate = '';
+		$toDate = '';
+		
+		if(isset($postedArr['fromDate']))
+		{
+			$fdate = explode('/',$postedArr['fromDate']);
+			$fromDate = $fdate[2].'-'.$fdate[1].'-'.$fdate[0].' 00:00:00';
+		}
+		else{
+			$fromDate = date('Y-m-d', strtotime( ' -1 day' )).' 00:00:00';
+		}
+		if(isset($postedArr['toDate']))
+		{
+			$tdate = explode('/',$postedArr['toDate']);
+			$toDate = $tdate[2].'-'.$tdate[1].'-'.$tdate[0].' 23:59:59';
+		}
+		else{
+			$toDate = date('Y-m-d', strtotime( ' -1 day' )).' 23:59:59';
+		}
+		
+		$office_ids = (isset($postedArr['office_location'])) ? $postedArr['office_location'] : '';
+		if(!empty($office_ids)){
+			foreach($office_ids as $office_id)
+			{
+				$office_names[] = getOfficeLocation($office_id);
+			}
+		}
+		
+		if(!empty($regional_ids)){
+			foreach($regional_ids as $region_id)
+			{
+				$region_names[] = getRegionLocation($region_id);
+			}
+		}
+		
+		$data['printOffice'] = (isset($postedArr['office_location'])) ? implode(',',$office_names) : 'All';
+		$data['printRegion'] = (isset($postedArr['region_id']) && $postedArr['region_id'] !='') ? implode(',',$region_names) : "All";
+		
+	//	$data['get_all_record']=$this->Report_model->_get_sales_report($fromDate,$toDate,$office_ids,$regional_ids);
+		
+		if(isset($postedArr['toDate']))
+		{
+			$fdate = explode('/',$postedArr['toDate']);
+			$reportDate = $fdate[2].'-'.$fdate[1].'-'.$fdate[0];
+		}
+		else{
+			$reportDate = date('Y-m-d',strtotime('now'));
+		}
+		$report_Date = date( 'Y-m-d', strtotime( $reportDate . ' -1 day' ) );
+		//$report_Date = date( 'Y-m-d', strtotime( $reportDate) );
+		$report_Date2 = date( 'Y-m-d', strtotime( $reportDate ) );
+		
+		$data['fromDate'] = date('d/m/Y',strtotime($fromDate));
+		$data['toDate'] = date('d/m/Y',strtotime($toDate));
+		$data['all_products'] = $productLists = $this->db->get_where('product_master',array('product_type_id'=>'1'))->result();
+		$data['get_all_record']=$this->Report_model->_get_sales_all_report($report_Date,$fromDate,$toDate,$office_ids,$regional_ids);
+		$data['reportDate'] = date('d/m/Y',strtotime($reportDate));
+		$data['tbreportDate'] = date('d/m/Y',strtotime($reportDate));
+		// echo '<pre>';
+		// print_r($data['get_all_record']);
+		// echo '</pre>';
+		$data['regional_store_id'] = $user_role_data->regional_store_id;
+		$this->load->view("includes/_header",$header);
+        $this->load->view("includes/_top_menu");
+		if(!empty($user_role_data) && $user_role_data->regional_store_id>0)
+		{
+			$this->load->view('report/sales_all_region_report',$data);
+		}
+	    else
+		{
+		$this->load->view('report/sales_all_report',$data);
+		}
+		$this->load->view('includes/_footer');
+	}
+	
+public function stock_transfer_recieve_inventory(){
+
+	if($this->session->userdata('role_id') > '1')
 		{
 			redirect(base_url('user/dashboard'));
 		}
@@ -1609,6 +1879,7 @@ if($this->session->userdata('role_id') > '1')
 		 $fromDate = '';
 		$toDate = '';
 		
+		
 		if(isset($postedArr['fromDate']))
 		{
 			$fdate = explode('/',$postedArr['fromDate']);
@@ -1625,7 +1896,6 @@ if($this->session->userdata('role_id') > '1')
 		else{
 			$toDate = date('Y-m-d').' 23:59:59';
 		}
-		
 		$data['fromDate'] = date('d/m/Y',strtotime($fromDate));
 		$data['toDate'] = date('d/m/Y',strtotime($toDate));
 		 
@@ -1769,7 +2039,6 @@ if($this->session->userdata('role_id') > '1')
 		}
 		$this->load->view('includes/_footer');
 		
-		
 	}
 	public function saleInventoryReportdetail()
 	{
@@ -1892,124 +2161,6 @@ if($this->session->userdata('role_id') > '1')
 	    else
 		{
 			$this->load->view('report/detail_sold_and_inventory_report',$data);
-		}
-		$this->load->view('includes/_footer');
-	}
-	public function salesallreport()
-	{
-		if($this->session->userdata('role_id') > '1')
-		{
-			redirect(base_url('user/dashboard'));
-		}
-			$user_id=$this->session->userdata('user_id');
-			$role_permission_id=$this->session->userdata('role_permission_id');
-			$office_id=$this->session->userdata('office_id');
-			$user_role_data=$this->db->get_where('user_role_permission_master',array('user_id'=>$user_id,'role_permission_id'=>$role_permission_id,'office_id'=>$office_id))->row();
-		
-		$header['title'] = "Sale All Report";
-		$postedArr  = $this->security->xss_clean($_POST);
-		// print_r($postedArr);
-		$regionData = $this->db->get('regional_store_master')->result();
-		$regional_ids = array();
-		$where_others=array('regional_store_type'=>'others');
-		if(!empty($user_role_data) && $user_role_data->regional_store_id>0)
-		{
-			$postedArr['region_type']="others";
-			$where_others=array('regional_store_type'=>'others','regional_store_id'=>$user_role_data->regional_store_id);
-		}
-		if($postedArr['region_type'] == "all"){
-			$regionData = $this->db->select('*')->from('regional_store_master')->get()->result();
-		}
-		else if($postedArr['region_type'] == "mmtc"){
-			$regionData = $this->db->select('*')->from('regional_store_master')->where(array('regional_store_type'=>'mmtc'))->get()->result();
-		}
-		else if($postedArr['region_type'] == "others"){
-			$regionData = $this->db->select('*')->from('regional_store_master')->where($where_others)->get()->result();
-		}
-		 //print_r($regionData);
-		foreach($regionData as $region)
-		{
-			$regional_ids[] = 	$region->regional_store_id;
-		}
-		
-		$region_names = array();
-		$office_names = array();
-		
-		$regional_ids = (isset($postedArr['region_id']) && $postedArr['region_id'] !='') ? $postedArr['region_id'] : $regional_ids;
-		$data['regionLists'] = $regionData;
-		$data['transfer_to']=$this->inventory_model->showroom_office_location_list($regional_ids);
-		
-		$fromDate = '';
-		$toDate = '';
-		
-		if(isset($postedArr['fromDate']))
-		{
-			$fdate = explode('/',$postedArr['fromDate']);
-			$fromDate = $fdate[2].'-'.$fdate[1].'-'.$fdate[0].' 00:00:00';
-		}
-		else{
-			$fromDate = date('Y-m-d', strtotime( ' -1 day' )).' 00:00:00';
-		}
-		if(isset($postedArr['toDate']))
-		{
-			$tdate = explode('/',$postedArr['toDate']);
-			$toDate = $tdate[2].'-'.$tdate[1].'-'.$tdate[0].' 23:59:59';
-		}
-		else{
-			$toDate = date('Y-m-d', strtotime( ' -1 day' )).' 23:59:59';
-		}
-		
-		$office_ids = (isset($postedArr['office_location'])) ? $postedArr['office_location'] : '';
-		if(!empty($office_ids)){
-			foreach($office_ids as $office_id)
-			{
-				$office_names[] = getOfficeLocation($office_id);
-			}
-		}
-		
-		if(!empty($regional_ids)){
-			foreach($regional_ids as $region_id)
-			{
-				$region_names[] = getRegionLocation($region_id);
-			}
-		}
-		
-		$data['printOffice'] = (isset($postedArr['office_location'])) ? implode(',',$office_names) : 'All';
-		$data['printRegion'] = (isset($postedArr['region_id']) && $postedArr['region_id'] !='') ? implode(',',$region_names) : "All";
-		
-	//	$data['get_all_record']=$this->Report_model->_get_sales_report($fromDate,$toDate,$office_ids,$regional_ids);
-		
-		if(isset($postedArr['toDate']))
-		{
-			$fdate = explode('/',$postedArr['toDate']);
-			$reportDate = $fdate[2].'-'.$fdate[1].'-'.$fdate[0];
-		}
-		else{
-			$reportDate = date('Y-m-d',strtotime('now'));
-		}
-		$report_Date = date( 'Y-m-d', strtotime( $reportDate . ' -1 day' ) );
-		//$report_Date = date( 'Y-m-d', strtotime( $reportDate) );
-		$report_Date2 = date( 'Y-m-d', strtotime( $reportDate ) );
-		
-		$data['fromDate'] = date('d/m/Y',strtotime($fromDate));
-		$data['toDate'] = date('d/m/Y',strtotime($toDate));
-		$data['all_products'] = $productLists = $this->db->get_where('product_master',array('product_type_id'=>'1'))->result();
-		$data['get_all_record']=$this->Report_model->_get_sales_all_report($report_Date,$fromDate,$toDate,$office_ids,$regional_ids);
-		$data['reportDate'] = date('d/m/Y',strtotime($reportDate));
-		$data['tbreportDate'] = date('d/m/Y',strtotime($reportDate));
-		// echo '<pre>';
-		// print_r($data['get_all_record']);
-		// echo '</pre>';
-		$data['regional_store_id'] = $user_role_data->regional_store_id;
-		$this->load->view("includes/_header",$header);
-        $this->load->view("includes/_top_menu");
-		if(!empty($user_role_data) && $user_role_data->regional_store_id>0)
-		{
-			$this->load->view('report/sales_all_region_report',$data);
-		}
-	    else
-		{
-		$this->load->view('report/sales_all_report',$data);
 		}
 		$this->load->view('includes/_footer');
 	}
